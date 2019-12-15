@@ -8,6 +8,8 @@ public class CharacterController : MonoBehaviour
     Camera cam;
     Rigidbody rb;
 
+    Vector3 velocity = Vector3.zero;
+
     bool isGrounded = false;
     bool jump = false;
 
@@ -16,14 +18,16 @@ public class CharacterController : MonoBehaviour
 
     [SerializeField] float jumpForce;
 
-    // Start is called before the first frame update
+    [SerializeField] float speed;
+
+    [SerializeField] bool airControl;
+
     void Start()
     {
         cam = GetComponentInChildren<Camera>(); //Récupère la camera
         rb = GetComponent<Rigidbody>(); //Récupère le Rigidbody
     }
 
-    // Update is called once per frame
     void Update()
     {
         float xMovement = Input.GetAxis("Horizontal");
@@ -31,7 +35,23 @@ public class CharacterController : MonoBehaviour
 
         if (xMovement != 0 || yMovement != 0) //Si le joueur doit bouger
         {
-
+            if (!airControl)
+            {
+                if (isGrounded)
+                {
+                    velocity = cam.transform.forward * yMovement + cam.transform.right * xMovement;
+                    velocity *= speed;
+                }
+            }
+            else
+            {
+                velocity = cam.transform.forward * yMovement + cam.transform.right * xMovement;
+                velocity *= speed;
+            }
+        }
+        else
+        {
+            velocity = Vector3.zero;
         }
 
         if (Input.GetButton("Jump")&&isGrounded)
@@ -49,5 +69,7 @@ public class CharacterController : MonoBehaviour
             jump = false;
             rb.AddForce(transform.up * jumpForce); //Donne une impulsion vers le haut au joueur
         }
+        velocity.y = rb.velocity.y;
+        rb.velocity = velocity;
     }
 }
